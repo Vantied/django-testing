@@ -1,15 +1,8 @@
-<<<<<<< HEAD
 from datetime import datetime, timedelta
 
 import pytest
-=======
-import pytest
-
-from datetime import datetime, timedelta
-
->>>>>>> 2e84e9cc880724d151b294f7c73a7d096298586f
-from django.test.client import Client
 from django.conf import settings
+from django.test.client import Client
 
 from news.models import News, Comment
 
@@ -47,13 +40,9 @@ def news():
 
 
 @pytest.fixture
-<<<<<<< HEAD
 def lot_news():
-=======
-def a_lot_news():
->>>>>>> 2e84e9cc880724d151b294f7c73a7d096298586f
     today = datetime.today()
-    news = [
+    news_list = [
         News(
             title=f'Новость {index}',
             text='Просто текст.',
@@ -61,8 +50,8 @@ def a_lot_news():
         )
         for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
     ]
-    News.objects.bulk_create(news)
-    return news
+    News.objects.bulk_create(news_list)
+    return news_list
 
 
 @pytest.fixture
@@ -82,7 +71,7 @@ def comments(news, author):
         comment = Comment.objects.create(
             news=news,
             author=author,
-            text=f'Tекст {index}',
+            text=f'Текст {index}',
         )
         comment.created = now + timedelta(days=index)
         comment.save()

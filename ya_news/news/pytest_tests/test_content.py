@@ -1,8 +1,4 @@
 import pytest
-<<<<<<< HEAD
-=======
-
->>>>>>> 2e84e9cc880724d151b294f7c73a7d096298586f
 from django.urls import reverse
 from django.conf import settings
 
@@ -10,24 +6,15 @@ from news.forms import CommentForm
 
 
 @pytest.mark.django_db
-<<<<<<< HEAD
 def test_home_page_news_count(lot_news, client):
-    """На главной странице выводится не больше 10 новостей"""
-=======
-def test_home_page_news_count(a_lot_news, client):
     """На главной странице не больше 10 новостей"""
->>>>>>> 2e84e9cc880724d151b294f7c73a7d096298586f
     response = client.get(reverse('news:home'))
     news_on_page = response.context['news_list']
     assert len(news_on_page) == settings.NEWS_COUNT_ON_HOME_PAGE
 
 
 @pytest.mark.django_db
-<<<<<<< HEAD
 def test_home_page_news_order(lot_news, client):
-=======
-def test_home_page_news_order(a_lot_news, client):
->>>>>>> 2e84e9cc880724d151b294f7c73a7d096298586f
     """Новости на главной странице отсортированы от свежей к старой"""
     response = client.get(reverse('news:home'))
     news_on_page = response.context['news_list']
@@ -37,7 +24,7 @@ def test_home_page_news_order(a_lot_news, client):
 
 @pytest.mark.django_db
 def test_comments_order(news, comments, client):
-    """Комментарии на странице новости отсортированы хронологически"""
+    """Комментарии на странице новости отсортированы по времени создания"""
     url = reverse('news:detail', kwargs={'pk': news.id})
     response = client.get(url)
 
@@ -48,7 +35,6 @@ def test_comments_order(news, comments, client):
 
 
 @pytest.mark.django_db
-<<<<<<< HEAD
 def test_comment_form_visible_for_authenticated_user(author_client, news):
     """Форма комментария отображается для авторизованного пользователя"""
     url = reverse('news:detail', args=(news.id,))
@@ -59,26 +45,7 @@ def test_comment_form_visible_for_authenticated_user(author_client, news):
 
 @pytest.mark.django_db
 def test_comment_form_not_visible_for_anonymous(client, news):
-    """Форма комментария отсутствует для анонимного пользователя."""
+    """Форма комментария отсутствует для анонимного пользователя"""
     url = reverse('news:detail', args=(news.id,))
     response = client.get(url)
     assert 'form' not in response.context
-=======
-@pytest.mark.parametrize(
-    'client_fixture, form_visible',
-    [
-        ('client', False),
-        ('author_client', True),
-    ]
-)
-def test_comment_form_visibility(client_fixture, form_visible, request, news):
-    """Проверяем видимость формы комментария в зависимости от пользователя"""
-    client = request.getfixturevalue(client_fixture)
-    response = client.get(reverse('news:detail', args=(news.id,)))
-
-    if form_visible:
-        assert 'form' in response.context
-        assert isinstance(response.context['form'], CommentForm)
-    else:
-        assert 'form' not in response.context
->>>>>>> 2e84e9cc880724d151b294f7c73a7d096298586f
