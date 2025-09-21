@@ -22,6 +22,67 @@ class TestRoutes(TestCase):
             author=cls.author,
         )
 
+<<<<<<< HEAD
+    def setUp(self):
+        self.author_client = self.client_class()
+        self.author_client.force_login(self.author)
+        self.not_author_client = self.client_class()
+        self.not_author_client.force_login(self.not_author)
+
+    def test_pages_availability(self):
+        """Тест доступности всех страниц для разных типов пользователей"""
+        login_url = reverse('users:login')
+
+        test_cases = [
+            # Главная и auth-страницы доступны всем
+            (reverse('notes:home'), self.client, 'get', HTTPStatus.OK),
+            (reverse('users:login'), self.client, 'get', HTTPStatus.OK),
+            (reverse('users:signup'), self.client, 'get', HTTPStatus.OK),
+            (reverse('users:logout'), self.client, 'post', HTTPStatus.OK),
+
+            # Авторизованный пользователь автор заметки
+            (reverse('notes:list'), self.author_client, 'get', HTTPStatus.OK),
+            (reverse('notes:add'), self.author_client, 'get', HTTPStatus.OK),
+            (reverse('notes:success'), self.author_client,
+             'get', HTTPStatus.OK),
+
+            # Страницы своей заметки
+            (reverse('notes:detail', args=(self.note.slug,)),
+             self.author_client, 'get', HTTPStatus.OK),
+            (reverse('notes:edit', args=(self.note.slug,)),
+             self.author_client, 'get', HTTPStatus.OK),
+            (reverse('notes:delete', args=(self.note.slug,)),
+             self.author_client, 'get', HTTPStatus.OK),
+
+            # Авторизованный пользователь не автор заметки
+            (reverse('notes:detail', args=(self.note.slug,)),
+             self.not_author_client, 'get', HTTPStatus.NOT_FOUND),
+            (reverse('notes:edit', args=(self.note.slug,)),
+             self.not_author_client, 'get', HTTPStatus.NOT_FOUND),
+            (reverse('notes:delete', args=(self.note.slug,)),
+             self.not_author_client, 'get', HTTPStatus.NOT_FOUND),
+
+            # Анонимный пользователь должен перенаправляться на логин
+            (reverse('notes:list'), self.client, 'get', HTTPStatus.FOUND),
+            (reverse('notes:add'), self.client, 'get', HTTPStatus.FOUND),
+            (reverse('notes:success'), self.client, 'get', HTTPStatus.FOUND),
+            (reverse('notes:detail', args=(self.note.slug,)), self.client,
+             'get', HTTPStatus.FOUND),
+            (reverse('notes:edit', args=(self.note.slug,)), self.client,
+             'get', HTTPStatus.FOUND),
+            (reverse('notes:delete', args=(self.note.slug,)), self.client,
+             'get', HTTPStatus.FOUND),
+        ]
+
+        for url, client, method, expected_status in test_cases:
+            with self.subTest(url=url, client=client):
+                response = getattr(client, method)(url)
+                self.assertEqual(response.status_code, expected_status)
+
+                # Для анонимного клиента проверяем правильность редиректа
+                if expected_status == HTTPStatus.FOUND:
+                    self.assertRedirects(response, f'{login_url}?next={url}')
+=======
     def test_pages_availability_for_anonymous_user(self):
         """1 и 5 пункт"""
         urls = ('notes:home', 'users:login', 'users:signup', 'users:logout')
@@ -83,3 +144,4 @@ class TestRoutes(TestCase):
                 expected_redirect = f'{login_url}?next={url}'
                 response = self.client.get(url)
                 self.assertRedirects(response, expected_redirect,)
+>>>>>>> 2e84e9cc880724d151b294f7c73a7d096298586f

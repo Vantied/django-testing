@@ -1,7 +1,13 @@
+<<<<<<< HEAD
+from datetime import datetime, timedelta
+
+import pytest
+=======
 import pytest
 
 from datetime import datetime, timedelta
 
+>>>>>>> 2e84e9cc880724d151b294f7c73a7d096298586f
 from django.test.client import Client
 from django.conf import settings
 
@@ -41,7 +47,11 @@ def news():
 
 
 @pytest.fixture
+<<<<<<< HEAD
+def lot_news():
+=======
 def a_lot_news():
+>>>>>>> 2e84e9cc880724d151b294f7c73a7d096298586f
     today = datetime.today()
     news = [
         News(

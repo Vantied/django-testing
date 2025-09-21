@@ -21,6 +21,20 @@ class TestContent(TestCase):
             author=cls.author,
         )
 
+<<<<<<< HEAD
+    def test_notes_list_visibility(self):
+        """
+        Проверяем, что автор видит свою заметку,
+        а другой пользователь нет
+        """
+        url = reverse('notes:list')
+        users_checks = (
+            (self.author, self.assertIn),
+            (self.not_author, self.assertNotIn),
+        )
+
+        for user, check_func in users_checks:
+=======
     def test_notes_list_for_different_users(self):
         """1 и 2 пункт"""
         users_checks = (
@@ -30,10 +44,20 @@ class TestContent(TestCase):
         url = reverse('notes:list')
 
         for user, note_in_list in users_checks:
+>>>>>>> 2e84e9cc880724d151b294f7c73a7d096298586f
             self.client.force_login(user)
             with self.subTest(user=user.username):
                 response = self.client.get(url)
                 object_list = response.context['object_list']
+<<<<<<< HEAD
+                check_func(self.note, object_list)
+
+    def test_add_and_edit_pages_contain_form(self):
+        """
+        Проверяем,
+        что страницы добавления и редактирования содержат форму
+        """
+=======
                 if note_in_list:
                     self.assertIn(self.note, object_list,)
                 else:
@@ -41,6 +65,7 @@ class TestContent(TestCase):
 
     def test_pages_contains_form(self):
         """3 пунтк"""
+>>>>>>> 2e84e9cc880724d151b294f7c73a7d096298586f
         test_cases = (
             ('notes:add', None),
             ('notes:edit', (self.note.slug,)),
