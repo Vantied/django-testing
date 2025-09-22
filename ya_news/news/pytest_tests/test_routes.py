@@ -1,69 +1,64 @@
 from http import HTTPStatus
 
 import pytest
-from django.urls import reverse
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    'name, args, client_fixture, method, expected_status, check_redirect',
+    'url_fixture, client_fixture, method, expected_status',
     [
-        # Доступ анонимного пользователя
-        ('news:home', None, 'client', 'get', HTTPStatus.OK, False),
-        ('news:detail', 'news', 'client', 'get', HTTPStatus.OK, False),
-        ('users:signup', None, 'client', 'get', HTTPStatus.OK, False),
-        ('users:login', None, 'client', 'get', HTTPStatus.OK, False),
-        ('users:logout', None, 'client', 'post', HTTPStatus.OK, False),
+        # Доступ анонимного пользователя / публичные страницы
+        ('news_home_url', 'client', 'get', HTTPStatus.OK),
+        ('news_detail_url', 'client', 'get', HTTPStatus.OK),
+        ('signup_url', 'client', 'get', HTTPStatus.OK),
+        ('login_url', 'client', 'get', HTTPStatus.OK),
+        ('logout_url', 'client', 'post', HTTPStatus.OK),
 
         # Автор комментария может редактировать и удалять
-        ('news:edit', 'comment', 'author_client', 'get', HTTPStatus.OK, False),
-        ('news:delete', 'comment', 'author_client', 'get',
-         HTTPStatus.OK, False),
-
-        # Аноним перенаправляется на логин
-        ('news:edit', 'comment', 'client', 'get', HTTPStatus.FOUND, True),
-        ('news:delete', 'comment', 'client', 'get', HTTPStatus.FOUND, True),
+        ('comment_edit_url', 'author_client', 'get', HTTPStatus.OK),
+        ('comment_delete_url', 'author_client', 'get', HTTPStatus.OK),
 
         # Другой пользователь получает 404
-        ('news:edit', 'comment', 'not_author_client',
-         'get', HTTPStatus.NOT_FOUND, False),
-        ('news:delete', 'comment', 'not_author_client',
-         'get', HTTPStatus.NOT_FOUND, False),
+        ('comment_edit_url', 'not_author_client', 'get',
+         HTTPStatus.NOT_FOUND),
+        ('comment_delete_url', 'not_author_client', 'get',
+         HTTPStatus.NOT_FOUND),
     ]
 )
-def test_status_codes_and_redirects(
-    request,
-    name,
-    args,
-    client_fixture,
-    method,
-    expected_status,
-    check_redirect,
-    news,
-    comment
-):
+def test_status_codes(request, url_fixture, client_fixture, method,
+                      expected_status):
     """
-    Проверяем доступ к страницам:
-    Анонимный пользователь видит публичные страницы и логин/логаут
-    Автор комментария может редактировать и удалять свой комментарий
-    Аноним перенаправляется на страницу логина при попытке изменять/удалить
-    Пользователь получает 404 при попытке изменять/удалить чужой комментарий
+    Проверяем только статус-коды:
+    - публичные страницы доступны анонимам;
+    - автор комментария может редактировать/удалять;
+    - аноним при попытке изменить/удалить получает редирект (302);
+    - не-автор получает 404.
     """
     client = request.getfixturevalue(client_fixture)
+    url = request.getfixturevalue(url_fixture)
 
-    arg = {
-        'news': (news.id,),
-        'comment': (comment.id,),
-        None: None,
-    }
-    url = reverse(name, args=arg[args])
     response = getattr(client, method)(url)
     assert response.status_code == expected_status
 
-    redirect_checks = {
-        True: reverse('users:login'),
-        False: None
-    }
-    expected_redirect_prefix = redirect_checks[check_redirect]
-    if expected_redirect_prefix:
-        assert response.url.startswith(expected_redirect_prefix)
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'url_fixture',
+    (
+        'comment_edit_url',
+        'comment_delete_url',
+    )
+)
+def test_anonymous_redirects(request, url_fixture, login_url):
+    """
+    Анонимный пользователь должен быть перенаправлен на страницу логина
+    при попытке редактировать или удалить комментарий
+    """
+    client = request.getfixturevalue('client')
+    url = request.getfixturevalue(url_fixture)
+
+    response = client.get(url)
+    expected_redirect = f'{login_url}?next={url}'
+
+    assert response.status_code == HTTPStatus.FOUND
+    assert response.url == expected_redirect

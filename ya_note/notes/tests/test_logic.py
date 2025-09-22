@@ -87,10 +87,8 @@ class TestLogic(TestCase):
             'title': self.form_data['title'],
             'text': self.form_data['text']
         })
-
         self.assertRedirects(response, reverse('notes:success'))
         new_note = self.get_created_note(notes_before)
-
         max_length = Note._meta.get_field('slug').max_length
         expected_slug = slugify(self.form_data['title'])[:max_length]
         self.assertEqual(new_note.slug, expected_slug)
@@ -101,6 +99,7 @@ class TestLogic(TestCase):
         self.client.force_login(self.author)
 
         old_author = self.note.author
+        old_author_id = self.note.author.id
         response = self.client.post(url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
 
@@ -108,12 +107,16 @@ class TestLogic(TestCase):
         self.assertEqual(self.note.title, self.form_data['title'])
         self.assertEqual(self.note.text, self.form_data['text'])
         self.assertEqual(self.note.slug, self.form_data['slug'])
-        self.assertEqual(self.note.author, old_author)
+        self.assertEqual(self.note.author.id, old_author_id)
+        self.assertEqual(self.note.author.username, old_author.username)
 
     def test_other_user_cant_edit_note(self):
         """Чужую заметку нельзя редактировать"""
         url = reverse('notes:edit', args=(self.note.slug,))
         self.client.force_login(self.not_author)
+
+        old_author = self.note.author
+        old_author_id = self.note.author.id
 
         response = self.client.post(url, data=self.form_data)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
@@ -122,23 +125,21 @@ class TestLogic(TestCase):
         self.assertEqual(note_from_db.title, self.note.title)
         self.assertEqual(note_from_db.text, self.note.text)
         self.assertEqual(note_from_db.slug, self.note.slug)
+        self.assertEqual(note_from_db.author.id, old_author_id)
+        self.assertEqual(note_from_db.author.username, old_author.username)
 
     def test_author_can_delete_note(self):
         """Автор может удалить свою заметку"""
         self.client.force_login(self.author)
         url = reverse('notes:delete', args=(self.note.slug,))
-
         response = self.client.post(url)
         self.assertRedirects(response, reverse('notes:success'))
-
         self.assertFalse(Note.objects.filter(pk=self.note.pk).exists())
 
     def test_other_user_cant_delete_note(self):
         """Другой пользователь не может удалить чужую заметку"""
         self.client.force_login(self.not_author)
         url = reverse('notes:delete', args=(self.note.slug,))
-
         response = self.client.post(url)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
-
         self.assertTrue(Note.objects.filter(pk=self.note.pk).exists())

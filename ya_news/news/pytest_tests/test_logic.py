@@ -25,14 +25,15 @@ def test_authenticated_user_can_create_comment(author_client, news, author):
     """Авторизованный пользователь может отправить комментарий"""
     url = reverse('news:detail', args=(news.id,))
     existing_ids = set(Comment.objects.values_list('id', flat=True))
-    author_client.post(url, data={'text': 'Тестовый комментарий'})
+    form_data = {'text': 'Тестовый комментарий'}
+    author_client.post(url, data=form_data)
 
     new_ids = set(Comment.objects.values_list('id', flat=True)) - existing_ids
     assert len(new_ids) == 1
 
     new_comment_id = new_ids.pop()
     comment = Comment.objects.get(id=new_comment_id)
-    assert comment.text == 'Тестовый комментарий'
+    assert comment.text == form_data['text']
     assert comment.news == news
     assert comment.author == author
 
