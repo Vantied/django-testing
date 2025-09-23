@@ -101,7 +101,7 @@ class TestLogic(TestCase):
         response = self.client.post(url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
 
-        note_from_db = Note.objects.get(slug=self.form_data['slug'])
+        note_from_db = Note.objects.get(pk=self.note.pk)
         self.assertEqual(note_from_db.title, self.form_data['title'])
         self.assertEqual(note_from_db.text, self.form_data['text'])
         self.assertEqual(note_from_db.slug, self.form_data['slug'])
