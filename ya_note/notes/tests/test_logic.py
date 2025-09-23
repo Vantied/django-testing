@@ -98,25 +98,19 @@ class TestLogic(TestCase):
         url = reverse('notes:edit', args=(self.note.slug,))
         self.client.force_login(self.author)
 
-        old_author = self.note.author
-        old_author_id = self.note.author.id
         response = self.client.post(url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
 
-        self.note.refresh_from_db()
-        self.assertEqual(self.note.title, self.form_data['title'])
-        self.assertEqual(self.note.text, self.form_data['text'])
-        self.assertEqual(self.note.slug, self.form_data['slug'])
-        self.assertEqual(self.note.author.id, old_author_id)
-        self.assertEqual(self.note.author.username, old_author.username)
+        note_from_db = Note.objects.get(slug=self.form_data['slug'])
+        self.assertEqual(note_from_db.title, self.form_data['title'])
+        self.assertEqual(note_from_db.text, self.form_data['text'])
+        self.assertEqual(note_from_db.slug, self.form_data['slug'])
+        self.assertEqual(note_from_db.author, self.note.author)
 
     def test_other_user_cant_edit_note(self):
         """Чужую заметку нельзя редактировать"""
         url = reverse('notes:edit', args=(self.note.slug,))
         self.client.force_login(self.not_author)
-
-        old_author = self.note.author
-        old_author_id = self.note.author.id
 
         response = self.client.post(url, data=self.form_data)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
@@ -125,8 +119,7 @@ class TestLogic(TestCase):
         self.assertEqual(note_from_db.title, self.note.title)
         self.assertEqual(note_from_db.text, self.note.text)
         self.assertEqual(note_from_db.slug, self.note.slug)
-        self.assertEqual(note_from_db.author.id, old_author_id)
-        self.assertEqual(note_from_db.author.username, old_author.username)
+        self.assertEqual(note_from_db.author, self.note.author)
 
     def test_author_can_delete_note(self):
         """Автор может удалить свою заметку"""
