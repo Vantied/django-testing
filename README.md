@@ -1,52 +1,41 @@
-# Django testing  
-## Если вы успели выполнить все домашние задания — ваш финальный проект готов.
-Перенесите тесты из ваших проектов в данный репозиторий (**django-testing**), который появился в вашем аккаунте.  
-В итоге должна получиться следующая структура репозитория:
-```
-Dev
- └── django-testing
-     ├── ya_news
-     │   ├── news
-     │   │   ├── fixtures/
-     │   │   ├── migrations/
-     │   │   ├── pytest_tests/   <- Директория с вашими тестами pytest для проекта ya_news
-     │   │   ├── __init__.py
-     │   │   ├── admin.py
-     │   │   ├── apps.py
-     │   │   ├── forms.py
-     │   │   ├── models.py
-     │   │   ├── urls.py
-     │   │   └── views.py
-     │   ├── templates/
-     │   ├── yanews/
-     │   ├── manage.py
-     │   └── pytest.ini
-     ├── ya_note
-     │   ├── notes
-     │   │   ├── migrations/
-     │   │   ├── tests/          <- Директория с вашими тестами unittest для проекта ya_note
-     │   │   ├── __init__.py
-     │   │   ├── admin.py
-     │   │   ├── apps.py
-     │   │   ├── forms.py
-     │   │   ├── models.py
-     │   │   ├── urls.py
-     │   │   └── views.py
-     │   ├── templates/
-     │   ├── yanote/
-     │   ├── manage.py
-     │   └── pytest.ini
-     ├── .gitignore
-     ├── README.md
-     ├── requirements.txt
-     └── structure_test.py
-```
+# Тесты для Django-проектов YaNews и YaNote
 
-## После копирования тестов, написанных в ходе прохождения спринта, для проверки готовности проекта к сдаче необходимо выполнить 4 действия:
-1. Создать и активировать виртуальное окружение; установить зависимости из файла `requirements.txt`;
-2. Запустить скрипт для `run_tests.sh` из корневой директории проекта:
-```sh
+Набор автотестов для двух Django-приложений: новостного сайта с комментариями YaNews (pytest) и сервиса заметок YaNote (unittest).
+
+## Что покрыто тестами
+
+**YaNews — pytest и pytest-django**
+- Доступность страниц для анонимных и авторизованных пользователей, редиректы на страницу входа.
+- Контент: количество и порядок новостей на главной, сортировка комментариев, видимость формы комментария.
+- Логика: создание комментариев, запрет на запрещённые слова, редактирование и удаление только автором.
+
+**YaNote — unittest (Django TestCase)**
+- Доступность страниц и защита чужих заметок.
+- Контент: в списке только свои заметки, формы на страницах создания и редактирования.
+- Логика: создание заметки, уникальность и автоматическая генерация slug, редактирование и удаление только автором.
+
+Всего 26 тестовых функций, часть из них параметризована.
+
+## Технологии
+
+Python 3.10+, Django 5.1, pytest, pytest-django, pytest-lazy-fixture, unittest.
+
+## Как запустить
+
+```bash
+git clone https://github.com/Vantied/django-testing.git
+cd django-testing
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+pip install -r requirements.txt
 bash run_tests.sh
 ```
 
-**Если все проверки успешно выполнились, проект можно отправлять на ревью.**
+## Что я вынес из проекта
+
+- Тестирование маршрутов, контента и бизнес-логики Django-приложений.
+- Фикстуры и параметризация в pytest, подтесты в unittest.
+
+## Автор
+
+Иван Богатов — [GitHub](https://github.com/Vantied) · Telegram [@Ivan_bogatov55](https://t.me/Ivan_bogatov55)
